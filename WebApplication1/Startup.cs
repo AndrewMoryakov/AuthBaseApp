@@ -3,6 +3,7 @@ using WebApplication1.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebApplication1.Data.Entities;
 using WebApplication1.Security;
 
 namespace WebApplication1
@@ -16,7 +17,6 @@ namespace WebApplication1
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 	        services.AddEntityFrameworkSqlite().AddDbContext<ApplicationDbContext>(options =>
@@ -59,7 +59,6 @@ namespace WebApplication1
         {
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

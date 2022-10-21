@@ -1,6 +1,8 @@
+using WebApplication1.Data.Entities.Service;
+
 namespace WebApplication1.Data.Repositories;
 
-public class IRepository<TEntity, TKey>
+public interface IRepository<TEntity, TKey>
     where TEntity : AggregateRoot<TKey>
 {
     IUnitOfWork UnitOfWork { get; }
@@ -13,5 +15,5 @@ public class IRepository<TEntity, TKey>
 
     Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-    void Delete(TEntity entity)
+    void Delete(TEntity entity);
 }

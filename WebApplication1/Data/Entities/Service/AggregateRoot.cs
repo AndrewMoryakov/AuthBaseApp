@@ -1,6 +1,5 @@
 namespace WebApplication1.Data.Entities.Service;
 
-public class AggregateRoot
+public abstract class AggregateRoot<TKey> : Entity<TKey>
 {
-    
 }

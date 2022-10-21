@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data.Entities;
 
 namespace WebApplication1.Data;
 
@@ -13,10 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ApplicationUser> Users { get; set; }
 }
 
-public class ApplicationUser : IdentityUser
-{
-    public virtual IList<Country> Countries { get; set; }
-}
+
 
 public class Country
 {
