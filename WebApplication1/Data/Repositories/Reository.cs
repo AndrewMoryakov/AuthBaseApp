@@ -5,23 +5,29 @@ using WebApplication1.Data.Entities.Service;
 namespace WebApplication1.Data.Repositories;
 
 public class Repository<T, TKey> : IRepository<T, TKey>
-        where T : AggregateRoot<TKey>
+        where  T:class,IEntity<TKey>
     {
         protected readonly ApplicationDbContext _dbContext;
 
         protected DbSet<T> DbSet => _dbContext.Set<T>();
-        
 
+        public ApplicationDbContext db;
         public Repository(ApplicationDbContext dbContext)
         {
+            db = dbContext;
             _dbContext = dbContext;
         }
 
         public IUnitOfWork UnitOfWork { get; }
 
-        public IQueryable<T> GetAll()
+        public Task<T> GetByIdAsync(TKey id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
+        }
+
+        public IQueryable<T> GetAll()
+        {
+            return DbSet;
         }
 
         public async Task AddOrUpdateAsync(T entity, CancellationToken cancellationToken = default)

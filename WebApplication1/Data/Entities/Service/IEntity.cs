@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Data.Entities.Service;
 
-public abstract class Entity<TKey> : IHasKey<TKey>, ITrackable
+public interface IEntity<TKey> : IHasKey<TKey>, ITrackable
 {
     public TKey Id { get; set; }
 

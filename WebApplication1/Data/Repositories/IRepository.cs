@@ -3,9 +3,10 @@ using WebApplication1.Data.Entities.Service;
 namespace WebApplication1.Data.Repositories;
 
 public interface IRepository<TEntity, TKey>
-    where TEntity : AggregateRoot<TKey>
+    where TEntity : IEntity<TKey>
 {
     IUnitOfWork UnitOfWork { get; }
+    Task<TEntity> GetByIdAsync(TKey id, CancellationToken cancellationToken);
 
     IQueryable<TEntity> GetAll();
 

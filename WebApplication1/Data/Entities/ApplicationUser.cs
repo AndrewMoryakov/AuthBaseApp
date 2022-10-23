@@ -2,7 +2,7 @@ using WebApplication1.Data.Entities.Service;
 
 namespace WebApplication1.Data.Entities;
 
-public class ApplicationUser : UserRoot
+public class ApplicationUser : UserRoot<string>
 {
-    public virtual IList<Country> Countries { get; set; }
+    public virtual ICollection<Country> Countries { get; set; }
 }

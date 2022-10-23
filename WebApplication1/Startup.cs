@@ -3,7 +3,9 @@ using WebApplication1.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using WebApplication1.Data.Entities;
+using WebApplication1.Data.Repositories;
 using WebApplication1.Security;
 
 namespace WebApplication1
@@ -17,10 +19,22 @@ namespace WebApplication1
 
         public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services )
         {
-	        services.AddEntityFrameworkSqlite().AddDbContext<ApplicationDbContext>(options =>
-		        options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionSqllite")));
+	        services.AddSwaggerGen(c =>
+	        {
+		        c.SwaggerDoc("v1", new OpenApiInfo {Title = "Base auth api", Version = "v1"});
+		        c.EnableAnnotations();
+	        });
+	        
+	        InjectRepositories(services);
+	        
+	        services.AddControllers(configure =>
+	        {
+		        //configure.Filters.Add(typeof(ExceptionFilter));//ToDo
+	        });
+	        services.AddDbContext<ApplicationDbContext>(options =>
+		           options.UseSqlite($"Data Source={AppContext.BaseDirectory}/data.db"));
 	        
 	        services.AddIdentity<ApplicationUser, IdentityRole>(p
 		        =>
@@ -53,10 +67,13 @@ namespace WebApplication1
 				        ValidateIssuerSigningKey = true,
 			        };
 		        });
+
+	        services.AddAuthorization();
         }
         
-        private static void AddRepositories(IServiceCollection services)
+        private void InjectRepositories(IServiceCollection services)
         {
+	        services.AddScoped<IRepository<ApplicationUser, string>, Repository<ApplicationUser, string>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -73,8 +90,6 @@ namespace WebApplication1
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mock JWT Auth API");
                 c.DocumentTitle = "test api";
-                c.DefaultModelsExpandDepth(0);
-                c.RoutePrefix = string.Empty;
             });
 
             app.UseRouting();
