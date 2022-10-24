@@ -5,8 +5,7 @@ using WebApplication1.Data.Entities.Service;
 
 namespace WebApplication1.Data.Repositories;
 
-public class Repository<T, TKey> : IRepository<T, TKey>
-        where  T:class,IEntity<TKey>
+public class Repository<T, TKey> : IRepository<T, TKey> where T: Entity<TKey> where TKey : IComparable
     {
         protected readonly ApplicationDbContext _dbContext;
 
@@ -21,9 +20,9 @@ public class Repository<T, TKey> : IRepository<T, TKey>
 
         public IUnitOfWork<ApplicationDbContext> UnitOfWork { get; }//ToDo
 
-        public Task<T> GetByIdAsync(TKey id, CancellationToken cancellationToken)
+        public async Task<T> GetByIdAsync(TKey id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return await DbSet.FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
         }
 
         public IQueryable<T?> GetAll()

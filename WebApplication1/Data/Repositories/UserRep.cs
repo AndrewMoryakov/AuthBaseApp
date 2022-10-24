@@ -22,6 +22,6 @@ public class UserRep : IUserRepository
     
     public async Task AddAsync(ApplicationUser entity, CancellationToken cancellationToken = default)
     {
-        _ = await _systemUsrStore.CreateAsync(entity, cancellationToken);   ;
+        _ = await _systemUsrStore.CreateAsync(entity, cancellationToken);
     }
 }

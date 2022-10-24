@@ -23,20 +23,3 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>().ToTable("Users");
     }
 }
-
-
-
-public class Country
-{
-    public int Id { get; set; }
-    public string Title { get; set; }
-    public virtual ICollection<Province> Provinces { get; set; }
-}
-
-public class Province
-{
-    public int Id { get; set; }
-    public string Title { get; set; }
-    public int CountryId { get; set; }
-    public Country Country { get; set; }
-}
