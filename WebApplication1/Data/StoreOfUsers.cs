@@ -5,14 +5,14 @@ using BadHttpRequestException = Microsoft.AspNetCore.Http.BadHttpRequestExceptio
 
 namespace WebApplication1.Data;
 
-public class UserStore : IUserStore
+public class StoreOfUsers : IStoreOfUsers
 {
     private ApplicationDbContext _context;
     private IPasswordHasher<ApplicationUser> _pswrdHasher;
     private IUserRepository _userRep;
     private IUnitOfWork<ApplicationDbContext> _uow;
 
-    public UserStore(ApplicationDbContext context, IPasswordHasher<ApplicationUser> pswHasher,
+    public StoreOfUsers(ApplicationDbContext context, IPasswordHasher<ApplicationUser> pswHasher,
         IUserRepository usrRep, IUnitOfWork<ApplicationDbContext> uow)
     {
         _context = context;

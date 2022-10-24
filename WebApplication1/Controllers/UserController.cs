@@ -13,11 +13,11 @@ namespace WebApplication1.Controllers;
 [AllowAnonymous]
 public class UserController: ControllerBase
 {
-    private readonly IUserStore _userStore;
+    private readonly IStoreOfUsers _storeOfUsers;
 
-    public UserController(IUserStore userStore)
+    public UserController(IStoreOfUsers storeOfUsers)
     {
-        _userStore = userStore;
+        _storeOfUsers = storeOfUsers;
     }
     
     
@@ -25,7 +25,7 @@ public class UserController: ControllerBase
     [Consumes("application/json")]
     public async Task<ActionResult<List<ApplicationUser>>> Get()
     {
-        return Ok(_userStore.Get());
+        return Ok(_storeOfUsers.Get());
     }
     
     [HttpPost]
@@ -34,7 +34,7 @@ public class UserController: ControllerBase
     {
         ApplicationUser user = model.Adapt<ApplicationUser>();
 
-        model = (await _userStore.AddAsync(user, model.Password, ct)).Adapt<UserDto>();;
+        model = (await _storeOfUsers.AddAsync(user, model.Password, ct)).Adapt<UserDto>();;
 
         return Created($"/api/users/{user.Id}", model);
     }

@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Data;
 using WebApplication1.Data.Entities;
 using WebApplication1.Data.Repositories;
+using WebApplication1.Data.ViewModel;
+using WebApplication1.Security;
 
 namespace WebApplication1.Controllers;
 
@@ -11,16 +15,21 @@ namespace WebApplication1.Controllers;
 [AllowAnonymous]
 public class AuthController : ControllerBase
 {
-    private readonly IUserRepository _repository;
+    private readonly IAuthenticationService<ApplicationUser> _authenticationService;
+    readonly UserManager<ApplicationUser> _userManager;
     
-    public AuthController(IUserRepository repos)
+    public AuthController(IAuthenticationService<ApplicationUser> authService, UserManager<ApplicationUser> usrManager)
     {
-        _repository = repos;
+        _authenticationService = authService;
+        _userManager = usrManager;
     }
 
-    [HttpGet()]
-    public async Task<ActionResult<string>> GetAuth()
+    [HttpPost()]
+    public async Task<ActionResult<Jwt>> GetAuth(UserDto user, CancellationToken cancellationToken = default)
     {
-        return Ok(_repository.GetAll());
+        var dbUser = await _userManager.FindByEmailAsync(user.Email);
+        var tokenResult = _authenticationService.CreateAccessTokenAsync(dbUser, user.Password, cancellationToken);
+        return Ok(tokenResult);
+
     }
 }

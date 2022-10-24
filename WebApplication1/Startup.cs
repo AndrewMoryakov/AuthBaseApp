@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using WebApplication1.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,10 +29,10 @@ namespace WebApplication1
 		        c.EnableAnnotations();
 	        });
 
-	        services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
+	        services.AddSingleton<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
 	        services.AddScoped<IUnitOfWork<ApplicationDbContext>, UnitOfWork>();
 	        InjectRepositories(services);
-	        services.AddScoped<IUserStore, UserStore>();
+	        services.AddScoped<IStoreOfUsers, StoreOfUsers>();
 	        
 	        services.AddControllers(configure =>
 	        {
@@ -55,22 +56,16 @@ namespace WebApplication1
 	        {
 		        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 		        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-	        })
-		        .AddJwtBearer(options =>
-		        {
-			        options.SaveToken = true;
-			        options.RequireHttpsMetadata = false;
-			        options.TokenValidationParameters = new TokenValidationParameters
-			        {
-				        ValidateIssuer = true,
-				        ValidIssuer = AuthOptions.Issuer,
-				        ValidateAudience = true,
-				        ValidAudience = AuthOptions.Audience,
-				        ValidateLifetime = true,
-				        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-				        ValidateIssuerSigningKey = true,
-			        };
-		        });
+	        });
+	        services.AddScoped<ITokenFactory<ApplicationUser>, TokenFactory<ApplicationUser>>();	        
+	        services.AddScoped<IAuthenticationService<ApplicationUser>, AuthenticationService<ApplicationUser>>();
+	        
+	        
+	        services.Configure<AuthTokenOptions>(Configuration.GetSection("AuthOptions"));
+	        var authTokenOptions = Configuration.GetSection("AuthOptions").Get<AuthTokenOptions>() as AuthTokenOptions;
+	        var signingConfigurations = new SigningCredentialsKeys(authTokenOptions.Secret) as SigningCredentialsKeys;
+	        services.AddSingleton(signingConfigurations);
+	        services.ConfigureJwtAuthentication(authTokenOptions, signingConfigurations);
 
 	        services.AddAuthorization();
         }
