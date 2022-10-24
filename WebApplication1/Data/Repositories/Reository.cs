@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data.Entities;
 using WebApplication1.Data.Entities.Service;
 
 namespace WebApplication1.Data.Repositories;
@@ -18,14 +19,14 @@ public class Repository<T, TKey> : IRepository<T, TKey>
             _dbContext = dbContext;
         }
 
-        public IUnitOfWork UnitOfWork { get; }
+        public IUnitOfWork<ApplicationDbContext> UnitOfWork { get; }//ToDo
 
         public Task<T> GetByIdAsync(TKey id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T?> GetAll()
         {
             return DbSet;
         }

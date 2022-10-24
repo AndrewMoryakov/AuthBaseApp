@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace WebApplication1.Data.Repositories;
 
-public interface IUnitOfWork
+public interface IUnitOfWork<TContext>: IDisposable where TContext : DbContext
 {
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    TContext DbContext { get; set; }
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     // Task<IDisposable> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default);
     //

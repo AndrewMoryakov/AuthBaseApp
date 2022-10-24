@@ -11,9 +11,9 @@ namespace WebApplication1.Controllers;
 [AllowAnonymous]
 public class AuthController : ControllerBase
 {
-    private readonly IRepository<ApplicationUser, string> _repository;
+    private readonly IUserRepository _repository;
     
-    public AuthController(IRepository<ApplicationUser, string> repos)
+    public AuthController(IUserRepository repos)
     {
         _repository = repos;
     }

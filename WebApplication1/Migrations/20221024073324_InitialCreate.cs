@@ -42,7 +42,6 @@ namespace WebApplication1.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "BLOB", nullable: false),
                     CreatedDateTime = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     UpdatedDateTime = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
                 },

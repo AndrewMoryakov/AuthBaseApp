@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebApplication1.Data.Entities;
+using WebApplication1.Data.Entities.Service;
 using WebApplication1.Data.Repositories;
 using WebApplication1.Security;
 
@@ -26,8 +27,11 @@ namespace WebApplication1
 		        c.SwaggerDoc("v1", new OpenApiInfo {Title = "Base auth api", Version = "v1"});
 		        c.EnableAnnotations();
 	        });
-	        
+
+	        services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
+	        services.AddScoped<IUnitOfWork<ApplicationDbContext>, UnitOfWork>();
 	        InjectRepositories(services);
+	        services.AddScoped<IUserStore, UserStore>();
 	        
 	        services.AddControllers(configure =>
 	        {
@@ -73,7 +77,7 @@ namespace WebApplication1
         
         private void InjectRepositories(IServiceCollection services)
         {
-	        services.AddScoped<IRepository<ApplicationUser, string>, Repository<ApplicationUser, string>>();
+	        services.AddScoped<IUserRepository, UserRep>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -1,3 +1,4 @@
+using WebApplication1.Data.Entities;
 using WebApplication1.Data.Entities.Service;
 
 namespace WebApplication1.Data.Repositories;
@@ -5,10 +6,10 @@ namespace WebApplication1.Data.Repositories;
 public interface IRepository<TEntity, TKey>
     where TEntity : IEntity<TKey>
 {
-    IUnitOfWork UnitOfWork { get; }
+    IUnitOfWork<ApplicationDbContext> UnitOfWork { get; }
     Task<TEntity> GetByIdAsync(TKey id, CancellationToken cancellationToken);
 
-    IQueryable<TEntity> GetAll();
+    IQueryable<TEntity?> GetAll();
 
     Task AddOrUpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
 

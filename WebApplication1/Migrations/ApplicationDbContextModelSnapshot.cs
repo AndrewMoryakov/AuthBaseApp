@@ -210,10 +210,6 @@ namespace WebApplication1.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
