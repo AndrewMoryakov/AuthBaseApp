@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
@@ -10,9 +11,10 @@ using WebApplication1.Data;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221024132357_CountryGuidId")]
+    partial class CountryGuidId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
@@ -238,7 +240,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Countries");
+                    b.ToTable("Country");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Entities.Province", b =>
@@ -264,7 +266,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Provinces");
+                    b.ToTable("Province");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

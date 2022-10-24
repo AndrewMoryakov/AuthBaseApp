@@ -14,7 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<ApplicationUser> AspNetUsers { get; set; }
     public DbSet<Country> Countries { get; set; }
-    public DbSet<Country> Provinces { get; set; }
+    public DbSet<Province> Provinces { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

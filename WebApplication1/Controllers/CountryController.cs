@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
@@ -9,7 +10,7 @@ namespace WebApplication1.Controllers;
 [Produces("application/json")]
 [Route("api/[controller]")]
 [ApiController]
-// [Authorize]
+[Authorize]
 public class CountryController: ControllerBase
 {
     private IRepository<Country, Guid> _countryRep;
@@ -22,7 +23,7 @@ public class CountryController: ControllerBase
     
     [HttpGet()]
     [Consumes("application/json")]
-    public async Task<ActionResult<Country>> GetAll()
+    public async Task<ActionResult<List<Country>>> GetAll()
     {
         var country = await _countryRep.GetAll().ToListAsync();
         return Ok(country);
@@ -38,7 +39,7 @@ public class CountryController: ControllerBase
     
     [HttpPost("{name}")]
     [Consumes("application/json")]
-    public async Task<ActionResult<Country>> Get(string name, CancellationToken ct = default)
+    public async Task<ActionResult<Country>> Post(string name, CancellationToken ct = default)
     {
         using (_uow)
         {

@@ -73,6 +73,7 @@ namespace WebApplication1
         private void InjectRepositories(IServiceCollection services)
         {
 	        services.AddScoped<IUserRepository, UserRep>();
+	        services.AddScoped<IRepository<Province, Guid>, Repository<Province, Guid>>();
 	        services.AddScoped<IRepository<Country, Guid>, Repository<Country, Guid>>();
         }
 

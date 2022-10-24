@@ -5,6 +5,6 @@ namespace WebApplication1.Data.Entities;
 public class Province : Entity<Guid>
 {
         public string Title { get; set; }
-        public int CountryId { get; set; }
+        public Guid CountryId { get; set; }
         public Country Country { get; set; }
 }
