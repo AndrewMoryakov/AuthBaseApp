@@ -9,6 +9,8 @@ using WebApplication1.Data.Entities;
 using WebApplication1.Data.Entities.Service;
 using WebApplication1.Data.Repositories;
 using WebApplication1.Security;
+using WebApplication1.Services;
+using WebApplication1.Bot;
 
 namespace WebApplication1
 {
@@ -57,8 +59,10 @@ namespace WebApplication1
 		        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 		        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 	        });
-	        services.AddScoped<ITokenFactory<ApplicationUser>, TokenFactory<ApplicationUser>>();	        
-	        services.AddScoped<IAuthenticationService<ApplicationUser>, AuthenticationService<ApplicationUser>>();
+                services.AddScoped<ITokenFactory<ApplicationUser>, TokenFactory<ApplicationUser>>();
+                services.AddScoped<IAuthenticationService<ApplicationUser>, AuthenticationService<ApplicationUser>>();
+                services.AddHttpClient<ILlmClient, OpenRouterClient>();
+                services.AddHostedService<TelegramBotHostedService>();
 	        
 	        
 	        services.Configure<AuthTokenOptions>(Configuration.GetSection("AuthOptions"));
