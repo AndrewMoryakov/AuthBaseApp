@@ -15,11 +15,11 @@ namespace WebApplication1.Controllers;
 [Authorize]
 public class ProvinceController: ControllerBase
 {
-    private IRepository<Province, Guid> _countryRep;
-    private IUnitOfWork<ApplicationDbContext> _uow;
+    private readonly IRepository<Province, Guid> _provinceRep;
+    private readonly IUnitOfWork<ApplicationDbContext> _uow;
     public ProvinceController(IRepository<Province, Guid> rep, IUnitOfWork<ApplicationDbContext> uow)
     {
-        _countryRep = rep;
+        _provinceRep = rep;
         _uow = uow;
     }
 
@@ -27,7 +27,7 @@ public class ProvinceController: ControllerBase
     [Consumes("application/json")]
     public async Task<ActionResult<List<Province>>> GetAll()
     {
-        var country = await _countryRep.GetAll().Include(el => el.Country)
+        var country = await _provinceRep.GetAll().Include(el => el.Country)
             .Select(el => new
             {
                 el.Id,
@@ -41,7 +41,12 @@ public class ProvinceController: ControllerBase
     [Consumes("application/json")]
     public async Task<ActionResult<Province>> Get(Guid provinceId,  CancellationToken ct = default)
     {
-        var province = await _countryRep.GetByIdAsync(provinceId, ct);
+        var province = await _provinceRep.GetByIdAsync(provinceId, ct);
+        if (province is null)
+        {
+            return NotFound();
+        }
+
         return Ok(province);//ToDo make a wrapper
     }
     
@@ -52,7 +57,7 @@ public class ProvinceController: ControllerBase
         using (_uow)
         {
             var province = newProvince.Adapt<Province>();
-            await _countryRep.AddAsync(province, ct);
+            await _provinceRep.AddAsync(province, ct);
             await _uow.SaveChangesAsync(ct);
             return Ok(province);
         }

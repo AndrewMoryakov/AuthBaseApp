@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using WebApplication1.Data.Entities;
 using WebApplication1.Data.Entities.Service;
 using WebApplication1.Data.Repositories;
+using WebApplication1.Filters;
 using WebApplication1.Security;
 using WebApplication1.Services;
 using WebApplication1.Bot;
@@ -35,10 +36,14 @@ namespace WebApplication1
 	        services.AddScoped<IUnitOfWork<ApplicationDbContext>, UnitOfWork>();
 	        InjectRepositories(services);
 	        services.AddScoped<IStoreOfUsers, StoreOfUsers>();
-	        
+
+	        services.Configure<GlobalExceptionFilterOptions>(options =>
+	        {
+		        options.DetailLevel = ExceptionDetailLevel.Message;
+	        });
 	        services.AddControllers(configure =>
 	        {
-		        //configure.Filters.Add(typeof(ExceptionFilter));//ToDo
+		        configure.Filters.Add(typeof(ExceptionFilter));
 	        });
 	        services.AddDbContext<ApplicationDbContext>(options =>
 		           options.UseSqlite($"Data Source={AppContext.BaseDirectory}/data.db"));

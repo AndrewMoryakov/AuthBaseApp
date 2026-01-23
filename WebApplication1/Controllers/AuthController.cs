@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<Jwt>> GetAuth(UserDto user, CancellationToken cancellationToken = default)
     {
         var dbUser = await _userManager.FindByEmailAsync(user.Email);
-        var tokenResult = _authenticationService.CreateAccessTokenAsync(dbUser, user.Password, cancellationToken);
+        var tokenResult = await _authenticationService.CreateAccessTokenAsync(dbUser, user.Password, cancellationToken);
         return Ok(tokenResult);
 
     }
