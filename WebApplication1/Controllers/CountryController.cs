@@ -13,8 +13,8 @@ namespace WebApplication1.Controllers;
 [Authorize]
 public class CountryController: ControllerBase
 {
-    private IRepository<Country, Guid> _countryRep;
-    private IUnitOfWork<ApplicationDbContext> _uow;
+    private readonly IRepository<Country, Guid> _countryRep;
+    private readonly IUnitOfWork<ApplicationDbContext> _uow;
     public CountryController(IRepository<Country, Guid> rep, IUnitOfWork<ApplicationDbContext> uow)
     {
         _countryRep = rep;
@@ -33,7 +33,12 @@ public class CountryController: ControllerBase
     [Consumes("application/json")]
     public async Task<ActionResult<Country>> Get(Guid countryId,  CancellationToken ct = default)
     {
-        var country = _countryRep.GetByIdAsync(countryId, ct);
+        var country = await _countryRep.GetByIdAsync(countryId, ct);
+        if (country is null)
+        {
+            return NotFound();
+        }
+
         return Ok(country);
     }
     

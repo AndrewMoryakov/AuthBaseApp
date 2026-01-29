@@ -22,7 +22,7 @@ public class UserController: ControllerBase
     
     [HttpGet]
     [Consumes("application/json")]
-    public async Task<ActionResult<List<ApplicationUser>>> Get()
+    public ActionResult<List<ApplicationUser>> Get()
     {
         return Ok(_storeOfUsers.Get());
     }
@@ -33,8 +33,8 @@ public class UserController: ControllerBase
     {
         ApplicationUser user = model.Adapt<ApplicationUser>();
 
-        model = (await _storeOfUsers.AddAsync(user, model.Password, ct)).Adapt<UserDto>();;
+        model = (await _storeOfUsers.AddAsync(user, model.Password, ct)).Adapt<UserDto>();
 
-        return Created($"/api/users/{user.Id}", model);
+        return Created($"/api/user/{user.Id}", model);
     }
 }

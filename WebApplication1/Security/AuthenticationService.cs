@@ -1,28 +1,32 @@
 using Microsoft.AspNetCore.Identity;
-using WebApplication1.Data;
 using WebApplication1.Exceptions;
 
 namespace WebApplication1.Security;
 
 public class AuthenticationService<TUser> : IAuthenticationService<TUser> where TUser:IdentityUser
 {
-    private readonly IPasswordHasher<TUser> _passwordHasher;
     private readonly ITokenFactory<TUser> _tokenFactory;
+    private readonly UserManager<TUser> _userManager;
 
-    public AuthenticationService(IPasswordHasher<TUser> passwordHasher, ITokenFactory<TUser> tokenFactory)
+    public AuthenticationService(ITokenFactory<TUser> tokenFactory, UserManager<TUser> userManager)
     {
-        _passwordHasher = passwordHasher;
         _tokenFactory = tokenFactory;
+        _userManager = userManager;
     }
 
-    public Jwt CreateAccessTokenAsync(TUser user, string password, 
+    public async Task<Jwt> CreateAccessTokenAsync(TUser user, string password, 
         CancellationToken cancellationToken)
     {
-        var hashedPassword = _passwordHasher.HashPassword(user, password);
+        if (user is null)
+        {
+            throw new NotFoundEntityException("User not found.");
+        }
 
-        if (_passwordHasher.VerifyHashedPassword(user, hashedPassword, password) 
-            == PasswordVerificationResult.Failed)
-             throw new NotFoundEntityException("User not found.");
+        var isValid = await _userManager.CheckPasswordAsync(user, password);
+        if (!isValid)
+        {
+            throw new NotFoundEntityException("User not found.");
+        }
 
         return _tokenFactory.CreateAccessToken(user);
     }
