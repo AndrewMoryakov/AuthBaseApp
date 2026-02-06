@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using WebApplication1.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,6 @@ using WebApplication1.Data.Repositories;
 using WebApplication1.Filters;
 using WebApplication1.Security;
 using WebApplication1.Services;
-using WebApplication1.Bot;
 
 namespace WebApplication1
 {
@@ -46,7 +46,8 @@ namespace WebApplication1
 		        configure.Filters.Add(typeof(ExceptionFilter));
 	        });
 	        services.AddDbContext<ApplicationDbContext>(options =>
-		           options.UseSqlite($"Data Source={AppContext.BaseDirectory}/data.db"));
+		           options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionSqlite")
+		                             ?? $"Data Source={AppContext.BaseDirectory}/data.db"));
 	        
 	        services.AddIdentity<ApplicationUser, IdentityRole>(p
 		        =>
@@ -59,15 +60,18 @@ namespace WebApplication1
 		        .AddEntityFrameworkStores<ApplicationDbContext>()
 		        .AddDefaultTokenProviders();
 
-	        services.AddAuthentication(options =>
-	        {
-		        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-	        });
-                services.AddScoped<ITokenFactory<ApplicationUser>, TokenFactory<ApplicationUser>>();
+                // External login cookie used by OAuth flows (Google). Keep it compatible with local HTTP dev.
+                services.Configure<CookieAuthenticationOptions>(IdentityConstants.ExternalScheme, options =>
+                {
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                });
+
+                services.AddScoped<IJwtTokenService, JwtTokenService>();
                 services.AddScoped<IAuthenticationService<ApplicationUser>, AuthenticationService<ApplicationUser>>();
+                services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+                services.Configure<ServiceClientOptions>(Configuration.GetSection("ServiceClients"));
                 services.AddHttpClient<ILlmClient, OpenRouterClient>();
-                services.AddHostedService<TelegramBotHostedService>();
 	        
 	        
 	        services.Configure<AuthTokenOptions>(Configuration.GetSection("AuthOptions"));
@@ -76,7 +80,35 @@ namespace WebApplication1
 	        services.AddSingleton(signingConfigurations);
 	        services.ConfigureJwtAuthentication(authTokenOptions, signingConfigurations);
 
+                // Optional: Google OAuth (external login). Configure Authentication:Google:ClientId/ClientSecret.
+                var googleClientId = Configuration["Authentication:Google:ClientId"];
+                var googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+                {
+                    services.AddAuthentication()
+                        .AddGoogle("Google", options =>
+                        {
+                            options.ClientId = googleClientId;
+                            options.ClientSecret = googleClientSecret;
+                            options.SignInScheme = IdentityConstants.ExternalScheme;
+                            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                        });
+                }
+
 	        services.AddAuthorization();
+
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("CorsPolicy", policy =>
+                    {
+                        policy
+                            .WithOrigins("http://localhost:5173")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    });
+                });
         }
         
         private void InjectRepositories(IServiceCollection services)
@@ -93,7 +125,17 @@ namespace WebApplication1
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            if (!env.IsEnvironment("Testing"))
+            {
+                app.UseHttpsRedirection();
+            }
+
+            // Apply EF Core migrations at startup (dev-friendly). In production you may prefer out-of-band migration.
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -103,9 +145,10 @@ namespace WebApplication1
             });
 
             app.UseRouting();
+            // CORS must run between routing and auth so that 401/403 responses still contain CORS headers.
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors("CorsPolicy");
 
             app.UseEndpoints(endpoints =>
             {

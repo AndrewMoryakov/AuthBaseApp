@@ -87,6 +87,11 @@ StyleCopReport.xml
 *.tmp_proj
 *_wpftmp.csproj
 *.log
+
+# Local dev databases
+*.db
+*.db-shm
+*.db-wal
 *.vspscc
 *.vssscc
 .builds

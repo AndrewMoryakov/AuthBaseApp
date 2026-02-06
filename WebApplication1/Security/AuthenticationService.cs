@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Identity;
 using WebApplication1.Exceptions;
+using WebApplication1.Data.Entities;
 
 namespace WebApplication1.Security;
 
 public class AuthenticationService<TUser> : IAuthenticationService<TUser> where TUser:IdentityUser
 {
-    private readonly ITokenFactory<TUser> _tokenFactory;
     private readonly UserManager<TUser> _userManager;
+    private readonly IJwtTokenService _jwtTokenService;
 
-    public AuthenticationService(ITokenFactory<TUser> tokenFactory, UserManager<TUser> userManager)
+    public AuthenticationService(IJwtTokenService jwtTokenService, UserManager<TUser> userManager)
     {
-        _tokenFactory = tokenFactory;
+        _jwtTokenService = jwtTokenService;
         _userManager = userManager;
     }
 
@@ -28,6 +29,10 @@ public class AuthenticationService<TUser> : IAuthenticationService<TUser> where 
             throw new NotFoundEntityException("User not found.");
         }
 
-        return _tokenFactory.CreateAccessToken(user);
+        if (user is not ApplicationUser au)
+            throw new InvalidOperationException("Unsupported user type.");
+
+        var issued = _jwtTokenService.CreateUserAccessToken(au);
+        return new Jwt(issued.AccessToken, issued.ExpiresAtUtc.Ticks);
     }
 }

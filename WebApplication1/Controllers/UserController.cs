@@ -9,7 +9,7 @@ namespace WebApplication1.Controllers;
 [Produces("application/json")]
 [Route("api/[controller]")]
 [ApiController]
-[AllowAnonymous]
+[Authorize]
 public class UserController: ControllerBase
 {
     private readonly IStoreOfUsers _storeOfUsers;
@@ -19,13 +19,6 @@ public class UserController: ControllerBase
         _storeOfUsers = storeOfUsers;
     }
     
-    
-    [HttpGet]
-    [Consumes("application/json")]
-    public ActionResult<List<ApplicationUser>> Get()
-    {
-        return Ok(_storeOfUsers.Get());
-    }
     
     [HttpPost]
     [Consumes("application/json")]
