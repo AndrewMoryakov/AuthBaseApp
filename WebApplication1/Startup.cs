@@ -132,6 +132,14 @@ namespace WebApplication1
             // Must be before UseHttpsRedirection and before auth so Request.Scheme is correct behind proxy.
             app.UseForwardedHeaders();
 
+            var pathBase = Configuration["App:PathBase"];
+            if (!string.IsNullOrWhiteSpace(pathBase))
+            {
+                // Allows hosting the auth service behind a reverse proxy prefix, e.g. https://host/auth/...
+                // In that setup, configure App:PathBase=/auth and ensure the proxy does NOT strip the prefix.
+                app.UsePathBase(pathBase.TrimEnd('/'));
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

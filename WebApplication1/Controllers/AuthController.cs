@@ -250,10 +250,13 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("tca.refresh", token, opts);
     }
 
-    private static string SanitizeReturnUrl(string? returnUrl)
+    private string SanitizeReturnUrl(string? returnUrl)
     {
-        // Prevent open redirects. For now we allow only localhost/127.0.0.1 (dev).
-        const string fallback = "http://127.0.0.1:5173/login";
+        // Prevent open redirects. Allow only configured hosts (dev defaults: localhost/127.0.0.1).
+        var fallback = _configuration["Authentication:DefaultReturnUrl"] ?? "http://127.0.0.1:5173/login";
+        var allowedHosts = _configuration.GetSection("Authentication:AllowedRedirectHosts").Get<string[]>() ??
+                           new[] { "127.0.0.1", "localhost" };
+
         if (string.IsNullOrWhiteSpace(returnUrl))
             return fallback;
 
@@ -263,7 +266,7 @@ public class AuthController : ControllerBase
         if (uri.Scheme is not ("http" or "https"))
             return fallback;
 
-        if (uri.Host is not ("127.0.0.1" or "localhost"))
+        if (!allowedHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase))
             return fallback;
 
         return uri.ToString();
