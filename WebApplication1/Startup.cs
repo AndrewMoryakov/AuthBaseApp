@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 using WebApplication1.Data.Entities;
 using WebApplication1.Data.Entities.Service;
 using WebApplication1.Data.Repositories;
@@ -109,6 +110,14 @@ namespace WebApplication1
                             .AllowCredentials();
                     });
                 });
+
+                // Reverse proxy support (Caddy): respect X-Forwarded-* so HTTPS redirection and cookies work correctly.
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
         }
         
         private void InjectRepositories(IServiceCollection services)
@@ -120,6 +129,9 @@ namespace WebApplication1
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Must be before UseHttpsRedirection and before auth so Request.Scheme is correct behind proxy.
+            app.UseForwardedHeaders();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -153,6 +165,11 @@ namespace WebApplication1
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGet("/health", async context =>
+                {
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("ok");
+                });
             });
         }
     }
